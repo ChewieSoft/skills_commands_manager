@@ -98,6 +98,10 @@ The `.claude/commands/speckit.*` commands and `.specify/` directory are **develo
 
 Available speckit commands: `specify`, `clarify`, `plan`, `analyze`, `tasks`, `implement`, `checklist`, `constitution`, `taskstoissues`.
 
+## Session Rules
+
+- At the end of every coding session, update `README.md` to reflect the current state of the marketplace — especially the **Available Plugins** table (sync with `.claude-plugin/marketplace.json`).
+
 ## Git
 
 - **Main branch**: `main`

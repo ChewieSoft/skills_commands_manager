@@ -8,6 +8,7 @@ Plugin marketplace for Claude Code — skills and commands for development workf
 |--------|---------|-------------|
 | **cicd** | 2.0.0 | Unified CI/CD troubleshooting and pipeline configuration for GitHub Actions, Docker, GHCR, and self-hosted runners |
 | **deploy-staging** | 1.2.0 | Automated deployment to staging via CD pipeline — syncs main with develop, merges feature branches, pushes to trigger staging pipeline, and verifies the run |
+| **codereview** | 1.0.0 | Automated pre-PR code review inspired by The Zen of Python (PEP 20). Produces severity-rated findings, test coverage assessment, and letter grading. Stack-agnostic with TypeScript/React defaults. |
 
 ## Installation
 
