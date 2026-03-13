@@ -64,7 +64,10 @@ skills_commands_manager/
        {
          "name": "my-plugin",
          "source": "./plugins/my-plugin",
-         "version": "1.0.0"
+         "version": "1.0.0",
+         "description": "Brief plugin description shown in Discover tab",
+         "category": "development",
+         "keywords": ["relevant", "tags"]
        }
      ]
    }
@@ -74,8 +77,8 @@ skills_commands_manager/
 
 When registering plugins in `marketplace.json`, the `source` field supports:
 - **Relative path**: `"./plugins/my-plugin"` — local directory in this repo
-- **GitHub**: `"github:chewiesoft/plugin-repo"` — from a GitHub repository
-- **npm**: `"npm:@chewiesoft/my-plugin"` — from npm registry
+- **GitHub**: `{ "source": "github", "repo": "ChewieSoft/plugin-repo" }` — from a GitHub repository
+- **npm**: `{ "source": "npm", "package": "@chewiesoft/my-plugin" }` — from npm registry
 
 ## Installation (End Users)
 
@@ -98,4 +101,3 @@ Available speckit commands: `specify`, `clarify`, `plan`, `analyze`, `tasks`, `i
 ## Git
 
 - **Main branch**: `main`
-- **Current branch**: `master`

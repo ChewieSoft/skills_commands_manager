@@ -11,12 +11,18 @@
     {
       "name": "cicd",
       "source": "./plugins/cicd",
-      "version": "2.0.0"
+      "version": "2.0.0",
+      "description": "Unified CI/CD troubleshooting and pipeline configuration for GitHub Actions, Docker, GHCR, and self-hosted runners",
+      "category": "development",
+      "keywords": ["cicd", "github-actions", "docker", "ghcr", "troubleshooting", "deployment"]
     },
     {
       "name": "deploy-staging",
       "source": "./plugins/deploy-staging",
-      "version": "1.2.0"
+      "version": "1.2.0",
+      "description": "Automated deployment to staging via CD pipeline — syncs main with develop, merges feature branches, pushes to trigger staging pipeline, and verifies the run",
+      "category": "development",
+      "keywords": ["deploy", "staging", "cd", "pipeline", "git-flow", "github-actions"]
     }
   ]
 }
