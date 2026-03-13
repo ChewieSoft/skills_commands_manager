@@ -1,7 +1,10 @@
 {
   "extraKnownMarketplaces": {
     "chewiesoft-marketplace": {
-      "source": "./"
+      "source": {
+        "source": "github",
+        "repo": "ChewieSoft/skills_commands_manager"
+      }
     }
   }
 }
