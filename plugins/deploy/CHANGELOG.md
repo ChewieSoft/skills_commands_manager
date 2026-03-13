@@ -1,6 +1,17 @@
-# Changelog — deploy-staging
+# Changelog — deploy
 
 Formato: [Semantic Versioning](https://semver.org/)
+
+## [1.3.0] - 2026-03-13
+
+### Alterado
+
+- Plugin renomeado de `deploy-staging` para `deploy` (namespace fix)
+- Command file renomeado de `deploy-staging.md` para `staging.md`
+- Invocação muda de `/deploy-staging:deploy-staging` para `/deploy:staging`
+- Preparado para futuros subcomandos (e.g. `/deploy:production`)
+
+---
 
 ## [1.2.0] - 2026-03-13
 

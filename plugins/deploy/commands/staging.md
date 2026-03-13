@@ -1,7 +1,7 @@
 ---
 description: Sincroniza main com develop, mergeia o branch atual em develop e faz push para triggar o pipeline CD Staging.
 metadata:
-  version: 1.2.0
+  version: 1.3.0
 ---
 
 ## Deploy to Staging

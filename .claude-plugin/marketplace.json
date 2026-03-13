@@ -17,12 +17,12 @@
       "keywords": ["cicd", "github-actions", "docker", "ghcr", "troubleshooting", "deployment"]
     },
     {
-      "name": "deploy-staging",
-      "source": "./plugins/deploy-staging",
-      "version": "1.2.0",
-      "description": "Automated deployment to staging via CD pipeline — syncs main with develop, merges feature branches, pushes to trigger staging pipeline, and verifies the run",
+      "name": "deploy",
+      "source": "./plugins/deploy",
+      "version": "1.3.0",
+      "description": "Automated deployment commands — staging and production pipelines via CD",
       "category": "development",
-      "keywords": ["deploy", "staging", "cd", "pipeline", "git-flow", "github-actions"]
+      "keywords": ["deploy", "staging", "production", "cd", "pipeline", "git-flow", "github-actions"]
     },
     {
       "name": "codereview",
