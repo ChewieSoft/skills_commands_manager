@@ -1,7 +1,7 @@
 ---
 name: cicd
 metadata:
-  version: 2.0.0
+  version: 2.1.0
 description: |
   Troubleshooting e configuração de pipelines CI/CD com GitHub Actions, Docker, GHCR e self-hosted runners.
   Skill unificada — detecta automaticamente backend (Prisma) ou frontend (Vite) e roteia para referências específicas.
@@ -52,7 +52,7 @@ Frontend:  checkout → install → lint → typecheck → test (Vitest)
 | Imagem               | Genérica (mesma para todos os envs)        | Environment-specific (VITE_* embeddadas no JS)|
 | Migration            | `prisma migrate deploy` antes do `up`      | Sem migration                                 |
 | `VIRTUAL_PORT`       | Obrigatório (`API_PORT` ≠ 80)             | Não necessário (nginx = porta 80)             |
-| GHCR login no deploy | Não necessário                             | Necessário (`docker/login-action@v3`)         |
+| GHCR login no deploy | `docker/login-action@v3` antes do pull     | `docker/login-action@v3` antes do pull        |
 | Prune                | `docker image prune -f`                    | `docker image prune -f --filter "label=..."`  |
 | Compose path         | `infra/nodejs/docker-compose.yml`          | `infra/dsr_web/docker-compose.yml`            |
 
@@ -135,7 +135,7 @@ Frontend:  checkout → install → lint → typecheck → test (Vitest)
 | 23 | `[F]` | `vite.config.ts` deve estar versionado | Sem ele, bundle sem plugin React → página branca |
 | 24 | `[F]` | Vitest coletando testes E2E Playwright | `vitest.config.ts` com `exclude: ['e2e/**']` |
 | 25 | `[F]` | `treeshake.moduleSideEffects` + circular chunks | Remover treeshake e manualChunks customizados |
-| 26 | `[F]` | GHCR login necessário no deploy job | `docker/login-action@v3` antes do pull |
+| 26 | `[S]` | GHCR login necessário no deploy job | `docker/login-action@v3` antes do pull (ambos os projetos) |
 
 ---
 

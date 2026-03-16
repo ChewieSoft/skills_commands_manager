@@ -67,7 +67,17 @@ env:
 - [ ] `prisma generate` executado antes do build
 - [ ] Path aliases resolvidos via `tsc-alias` (script `build_prod`)
 
-## 7. Rede nginx-proxy (Backend-Específico)
+## 7. Workflow CD Staging/Production
+
+- [ ] `docker/login-action@v3` no job `build-and-push` com `GITHUB_TOKEN`
+- [ ] `docker/login-action@v3` no job `deploy` antes do `docker compose pull`
+- [ ] Generate .env com todos os secrets do environment
+- [ ] `prisma migrate deploy` antes do `docker compose up`
+- [ ] `docker image prune -f` no cleanup
+- [ ] Cleanup .env com `if: always()`
+- [ ] Permissions: `packages: write, contents: read`
+
+## 8. Rede nginx-proxy (Backend-Específico)
 
 - [ ] `VIRTUAL_PORT: '${API_PORT}'` no docker-compose.yml (obrigatório quando `API_PORT` ≠ 80)
 - [ ] Sem `ports:` no compose de staging/produção (nginx-proxy roteia internamente)

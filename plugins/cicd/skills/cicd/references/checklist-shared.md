@@ -13,7 +13,7 @@ Seções compartilhadas entre backend e frontend para configuração de novo env
 - [ ] Runner user no grupo `docker` (evita problemas sudo/user)
 - [ ] Runner user tem permissão para `docker compose`
 - [ ] Labels verificados em GitHub > Settings > Actions > Runners
-- [ ] GHCR auth configurado no mesmo contexto (user/sudo) que executa `docker pull`: `docker login ghcr.io`
+- [ ] GHCR login no deploy job via `docker/login-action@v3` antes do `docker compose pull` (logout automático no post-step, config isolada por job — preferir sobre `docker login` manual em self-hosted runners)
 
 **Instalação do runner:**
 

@@ -12,26 +12,37 @@ Cenários de infraestrutura que se aplicam tanto ao backend quanto ao frontend.
 Error response from daemon: Head "https://ghcr.io/v2/.../manifests/...": unauthorized
 ```
 
-**Causa:** O `docker login ghcr.io` foi feito em contexto diferente (ex: user normal) do que executa o `docker pull` (ex: via `sudo`). As credenciais ficam em `~/.docker/config.json` do usuário que fez login.
+**Causa:** O job Deploy no self-hosted runner não autenticava no GHCR antes do `docker compose pull`. Cada job do GitHub Actions tem contexto isolado — o login feito no job Build & Push não persiste para o job Deploy.
 
 **Diagnóstico:**
 
 ```bash
-cat ~/.docker/config.json | grep ghcr   # Verificar se há credenciais
-sudo cat /root/.docker/config.json | grep ghcr  # Verificar contexto root
+# Verificar se o deploy job tem step de login antes do pull
+grep -A5 "Login to GHCR" .github/workflows/cd-staging.yml
 ```
 
-**Correção:**
+**Correção (workflow — recomendada):**
+
+Adicionar `docker/login-action@v3` no job Deploy, antes do `docker compose pull`:
+
+```yaml
+- name: Login to GHCR
+  uses: docker/login-action@v3
+  with:
+    registry: ghcr.io
+    username: ${{ github.actor }}
+    password: ${{ secrets.GITHUB_TOKEN }}
+```
+
+Preferir `docker/login-action@v3` sobre `docker login` manual porque:
+- **Logout automático** no post-step (limpa credenciais mesmo se o job falhar)
+- **Config isolada** por job (evita race condition em `~/.docker/config.json`)
+- **Masking de credenciais** nos logs via `@actions/core`
+
+**Correção alternativa (manual no servidor — apenas para debug):**
 
 ```bash
-# Opção 1: Fazer login no mesmo contexto que executa docker (via stdin, sem expor token no histórico)
-echo "$TOKEN" | sudo docker login ghcr.io -u USERNAME --password-stdin
-
-# Opção 2: Adicionar runner user ao grupo docker (evita sudo)
-# ⚠️ ATENÇÃO: Isso concede privilégios equivalentes a root ao usuário.
-# Considere usar Docker rootless como alternativa mais segura.
-sudo usermod -aG docker $USER
-# Logout e login para aplicar
+echo "$TOKEN" | docker login ghcr.io -u USERNAME --password-stdin
 ```
 
 ---
