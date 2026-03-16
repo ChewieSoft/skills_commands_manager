@@ -2,6 +2,26 @@
 
 Formato: [Semantic Versioning](https://semver.org/)
 
+## [1.4.0] - 2026-03-16
+
+### Corrigido
+
+- Pre-flight: `npx eslint .` corrigido para `npx eslint src/` (alinhado com CI)
+- Pre-flight: `yarn vitest run src/test/` corrigido para `yarn test --watchAll=false` (projeto usa Jest, nao Vitest)
+
+### Alterado
+
+- Step 9 reescrito: agora captura o `run-id` do pipeline triggado pelo push
+- Novo step 10: monitora o pipeline com `gh run watch <run-id>` ate completar
+- Novo step 11: avalia resultado — se falhar, exibe `gh run view --log-failed`; se suceder, reporta com link
+- A skill so considera o deploy concluido quando o pipeline terminar com sucesso
+
+### Motivacao
+
+A versao anterior apenas listava os runs recentes sem monitorar o resultado. O usuario precisava verificar manualmente se o pipeline passou. Agora o fluxo e end-to-end.
+
+---
+
 ## [1.3.0] - 2026-03-13
 
 ### Alterado

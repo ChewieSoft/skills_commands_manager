@@ -1,7 +1,7 @@
 ---
 description: Sincroniza main com develop, mergeia o branch atual em develop e faz push para triggar o pipeline CD Staging.
 metadata:
-  version: 1.3.0
+  version: 1.4.0
 ---
 
 ## Deploy to Staging
@@ -30,9 +30,9 @@ Se houver mudancas nao commitadas, abortar e informar o usuario.
 Rodar as mesmas verificacoes que o CI executa para evitar falhas no pipeline:
 
 ```bash
-npx eslint . --max-warnings 0
+npx eslint src/ --max-warnings 0
 npx tsc --noEmit
-yarn vitest run src/test/
+yarn test --watchAll=false
 ```
 
 Se qualquer comando falhar, abortar e informar o usuario. Nao prosseguir com push.
@@ -107,17 +107,43 @@ git checkout $CURRENT_BRANCH
 
 ---
 
-9. **Verificar pipeline**
+9. **Capturar run-id do pipeline triggado**
+
+Aguardar alguns segundos para o run aparecer, depois capturar o ID:
 
 ```bash
-gh run list --branch develop --limit 3
+gh run list --branch develop --limit 1 --json databaseId,status,name --jq '.[0].databaseId'
 ```
 
-Exibir status do run mais recente ao usuario.
+Armazenar o `run-id` retornado.
+
+10. **Monitorar pipeline ate completar**
+
+```bash
+gh run watch <run-id>
+```
+
+Aguardar o pipeline completar. Nao considerar o deploy concluido ate o pipeline terminar.
+
+11. **Avaliar resultado**
+
+Se o pipeline **falhar**:
+
+```bash
+gh run view <run-id> --log-failed
+```
+
+Exibir o log do step que falhou e reportar o erro ao usuario com detalhes.
+
+Se o pipeline **suceder**:
+
+Reportar sucesso ao usuario com o link do run:
+`https://github.com/<owner>/<repo>/actions/runs/<run-id>`
+
+**IMPORTANTE:** A skill so deve considerar o trabalho concluido quando o pipeline completar com sucesso. Se falhar, investigar e reportar — nao encerrar silenciosamente.
 
 ### Notas
 
 - O push em `develop` trigga o workflow `cd-staging.yml` automaticamente
 - A imagem Docker e buildada com tag `:staging` e pushada para GHCR
 - O deploy e feito no self-hosted runner com label `staging`
-- Para monitorar: `gh run watch <run-id>` ou verificar no GitHub Actions
