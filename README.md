@@ -9,6 +9,8 @@ Plugin marketplace for Claude Code — skills and commands for development workf
 | **cicd** | 2.0.0 | Unified CI/CD troubleshooting and pipeline configuration for GitHub Actions, Docker, GHCR, and self-hosted runners |
 | **deploy** | 1.3.0 | Automated deployment commands — staging and production pipelines via CD |
 | **codereview** | 1.0.0 | Automated pre-PR code review inspired by The Zen of Python (PEP 20). Produces severity-rated findings, test coverage assessment, and letter grading. Stack-agnostic with TypeScript/React defaults. |
+| **statusline** | 1.0.0 | Interactive setup for Claude Code status line — cross-platform (Bash + PowerShell) |
+| **release** | 1.0.0 | Automated GitHub Release creation with categorized release notes from git history |
 
 ### deploy
 
@@ -16,6 +18,18 @@ Plugin marketplace for Claude Code — skills and commands for development workf
 |---------|-------------|
 | `/deploy:staging` | Sincroniza main com develop, mergeia o branch atual em develop e faz push para triggar o pipeline CD Staging |
 | `/deploy:production` | *(planned)* |
+
+### release
+
+| Command | Description |
+|---------|-------------|
+| `/release:release` | Gera release notes automaticamente a partir do último release e cria um novo GitHub Release via gh CLI |
+
+### statusline
+
+| Command | Description |
+|---------|-------------|
+| `/statusline:setup` | Interactive wizard to configure status line sections, colors, emojis, and separator |
 
 ## Installation
 
