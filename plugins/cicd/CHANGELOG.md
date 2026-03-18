@@ -22,7 +22,6 @@ Formato: [Semantic Versioning](https://semver.org/)
 - Tabela de arquivos do pipeline backend usa paths genéricos (`Dockerfile` ou `infra/*/Dockerfile`)
 - Comando de rollback backend usa `<COMPOSE_PATH>` genérico
 - `checklist-backend.md`: seção 7 (Workflow CD) inclui verificação de compose path
-- Versão: 2.1.0 → 2.2.0
 
 ### Motivação
 
