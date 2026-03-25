@@ -2,7 +2,7 @@
   "name": "release",
   "description": "Automated GitHub Release creation with categorized release notes from git history",
   "author": { "name": "Chewiesoft" },
-  "version": "1.0.0",
+  "version": "1.1.0",
   "category": "development",
   "keywords": ["release", "release-notes", "github-release", "changelog", "git-tag", "semver", "gh-cli"],
   "commands": "./commands"

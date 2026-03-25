@@ -67,8 +67,17 @@ git diff --stat $LAST_TAG..HEAD
 # Merged PRs (merge commits)
 git log $LAST_TAG..HEAD --merges --oneline
 
-# Contributors
-git log $LAST_TAG..HEAD --format="%aN" --no-merges | sort | uniq
+# Contributors — resolve GitHub usernames from commit emails via gh API
+# This avoids the problem where git author names differ from GitHub usernames
+# (e.g., same person commits as "JorUge", "Jorge Ferrari", and "j0ruge")
+CONTRIBUTOR_EMAILS=$(git log $LAST_TAG..HEAD --format="%aE" --no-merges | grep -v "noreply@" | sort | uniq)
+# For each unique email, try to resolve the GitHub username
+for email in $CONTRIBUTOR_EMAILS; do
+  gh_user=$(gh api "/search/users?q=$email+in:email" --jq '.items[0].login' 2>/dev/null)
+  if [ -n "$gh_user" ] && [ "$gh_user" != "null" ]; then
+    echo "@$gh_user"
+  fi
+done | sort | uniq
 
 # Total files and lines
 git diff --shortstat $LAST_TAG..HEAD
@@ -177,7 +186,7 @@ Use **exactly** this format (adapt sections according to the collected data — 
 
 ---
 
-**Contributors:** @usernames
+**Contributors:** @resolved-github-usernames (from gh api email lookup, NOT git author names)
 ````
 
 ### 7. Create the Release
@@ -202,3 +211,4 @@ Display the full release note in the conversation along with the URL of the crea
 4. **Group by feature** — commits related to the same PR/feature should be grouped, not listed individually.
 5. **Omit empty sections** — if there are no bug fixes, do not include the 🐛 section.
 6. **Consistent format** — follow the template above exactly, including emojis in headers.
+7. **Contributors must be GitHub usernames** — resolve via `gh api` search by email, not `git log` author names. The same person may have multiple git author names (e.g., `JorUge`, `Jorge Ferrari`, `j0ruge`) but only ONE GitHub username. Never list the same person twice. Exclude bot accounts (e.g., `noreply@anthropic.com`).

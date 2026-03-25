@@ -1,5 +1,18 @@
 # Changelog — release
 
+## [1.1.0] — 2026-03-25
+
+### Fixed
+
+- **Contributors listed wrong usernames** — git author names (`JorUge`, `Jorge Ferrari`) don't match GitHub usernames (`j0ruge`). Now resolves via `gh api` email lookup instead of `git log --format="%aN"`
+- Exclude bot accounts (`noreply@anthropic.com`) from contributors list
+- Same person with multiple git author names no longer appears as multiple contributors
+
+### Changed
+
+- Contributors section now uses `gh api /search/users?q=EMAIL` to resolve actual GitHub usernames
+- Added quality rule #7: contributors must be resolved GitHub usernames, never fabricated
+
 ## [1.0.0] — 2026-03-16
 
 ### Added
