@@ -137,6 +137,53 @@ docker exec service_report_api sh -c "wget -qO- http://localhost:3003/health || 
 
 ---
 
+### "No pending migrations" but app crashes with missing column/table
+
+**Symptom:** `prisma migrate deploy` reports "No pending migrations to apply" in the CD workflow, but the application container crashes with a database error (e.g., `column "X" does not exist` or `relation "X" does not exist`). The `_prisma_migrations` table shows one fewer migration than the codebase.
+
+**Cause:** On self-hosted runners, `docker run` does **not** auto-pull the image if the tag already exists locally. The migration step ran `docker run ghcr.io/.../api:staging npx prisma migrate deploy` using the **cached old image** (which had N migrations), while the newly built image (N+1 migrations) was already pushed to GHCR but not yet pulled on the runner.
+
+**Diagnosis:**
+
+```bash
+# Compare migration count in DB vs codebase
+docker exec <db_container> psql -U <user> -d <db> -c "SELECT count(*) FROM _prisma_migrations"
+ls prisma/migrations/ | grep -c "^[0-9]"
+
+# Check when the last migration was applied vs CD run time
+docker exec <db_container> psql -U <user> -d <db> \
+  -c "SELECT migration_name, finished_at FROM _prisma_migrations ORDER BY finished_at DESC LIMIT 3"
+
+# Verify the image digest on the runner vs GHCR
+docker inspect ghcr.io/<org>/<image>:staging --format '{{.Id}}'
+```
+
+**Fix (workflow):**
+
+Add `docker pull` before `docker run` in the migration step of the CD workflow:
+
+```yaml
+- name: Run database migrations
+  run: |
+    docker pull ghcr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+    docker run --rm --network ${{ secrets.NGINX_NETWORK_NAME }} \
+      -e DB_URL=${{ secrets.DB_URL }} \
+      ghcr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
+      npx prisma migrate deploy --schema packages/backend/prisma/schema.prisma
+```
+
+**Manual recovery (if already deployed with stale migration):**
+
+```bash
+# Pull the correct image and run migration manually
+docker pull ghcr.io/<org>/<image>:staging
+docker run --rm -e DB_URL=<url> --network <network> \
+  ghcr.io/<org>/<image>:staging \
+  npx prisma migrate deploy --schema packages/backend/prisma/schema.prisma
+```
+
+---
+
 ## Diagnosis Flow — Backend
 
 ```text
@@ -153,10 +200,11 @@ Workflow failed
 │   │   │   └── Assertion error → data/seed
 │   │   └── Exit 127 → missing dependency
 │   ├── build-and-push → Dockerfile or GHCR auth
-│   └── deploy → Runner offline, compose error, or env var
+│   └── deploy → Runner offline, compose error, env var, or stale image
 │       ├── ZodError invalid_type → missing env var in Generate .env
 │       ├── ZodError invalid_string → URL without https://
 │       ├── ERR_CONNECTION_REFUSED → VIRTUAL_PORT not defined
+│       ├── "No pending migrations" + app crash → stale image cache → docker pull before docker run
 │       └── runner offline → systemctl status actions.runner.*
 └── Reproduce locally before modifying the workflow
 ```

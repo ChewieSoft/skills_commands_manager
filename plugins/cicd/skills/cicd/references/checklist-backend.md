@@ -84,6 +84,7 @@ env:
 - [ ] `docker/login-action@v3` in the `build-and-push` job with `GITHUB_TOKEN`
 - [ ] `docker/login-action@v3` in the `deploy` job before `docker compose pull`
 - [ ] Generate .env with all environment secrets
+- [ ] `docker pull` the image before `docker run ... prisma migrate deploy` (self-hosted runners cache images by tag; without an explicit pull, the migration runs against the stale local image)
 - [ ] `prisma migrate deploy` before `docker compose up`
 - [ ] Correct compose path for the project (e.g., `infra/nodejs/`, `infra/`, etc.)
 - [ ] `docker image prune -f` in cleanup

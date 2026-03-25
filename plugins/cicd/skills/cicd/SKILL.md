@@ -1,7 +1,7 @@
 ---
 name: cicd
 metadata:
-  version: 2.2.0
+  version: 2.3.0
 description: |
   Troubleshooting and configuration of CI/CD pipelines with GitHub Actions, Docker, GHCR, and self-hosted runners.
   Unified skill — automatically detects backend (Prisma) or frontend (Vite) and routes to specific references.
@@ -96,6 +96,7 @@ Frontend:          checkout → install → lint → typecheck → test (Vitest)
 | `[F]` | Vitest collecting Playwright E2E tests                 | `vitest.config.ts` without `e2e/` exclude            | Add `exclude: ['e2e/**']`                                                             |
 | `[B]` | `npx biome check .` fails on config files              | Biome checks all files by default                    | Use `files.includes` in `biome.jsonc` to scope or fix the config files                |
 | `[B]` | Biome 2.x config error (`unknown key "ignore"`)       | Biome 2.x removed `ignore` in favor of `includes`   | Use `files.includes` instead of `files.ignore` in `biome.jsonc`                       |
+| `[B]` | Migration reports "No pending migrations" but app crashes with missing column | Stale Docker image cache on self-hosted runner (`docker run` does not pull if tag exists locally) | `docker pull` the image before `docker run` in the migration step |
 | `[F]` | Container nginx returns 403                            | dist/ empty or not copied                            | Check `npm run build` and `COPY --from=build` in Dockerfile                           |
 
 ---
@@ -146,6 +147,7 @@ Frontend:          checkout → install → lint → typecheck → test (Vitest)
 | 26 | `[S]` | GHCR login required in deploy job | `docker/login-action@v3` before pull (both projects) |
 | 27 | `[B]` | Biome checks all files by default | Use `files.includes` in `biome.jsonc` to limit scope to `src/` or fix config files |
 | 28 | `[S]` | First deploy requires workflows on `develop` branch | CD Staging triggers on push to `develop` — workflows must be on that branch before the first push |
+| 29 | `[B]` | `docker run` does not auto-pull if the tag exists locally on self-hosted runners | Always `docker pull <image>` before `docker run <image>` in migration steps — stale cache causes "no pending migrations" while the app expects new schema |
 
 ---
 

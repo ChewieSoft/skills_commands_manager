@@ -2,6 +2,22 @@
 
 Formato: [Semantic Versioning](https://semver.org/)
 
+## [2.3.0] - 2026-03-25
+
+### Adicionado
+
+- Quick Troubleshooting: nova entrada `[B]` para "Migration reports 'No pending migrations' but app crashes with missing column" (Docker image cache stale)
+- Lição #29: `docker run` não faz auto-pull se a tag já existe localmente no self-hosted runner
+- `troubleshooting-backend.md`: novo cenário "No pending migrations but app crashes" com diagnóstico, fix no workflow e recovery manual
+- `troubleshooting-backend.md`: diagnosis flow atualizado com leaf de stale image cache no branch de deploy
+- `checklist-backend.md`: seção 7 agora inclui `docker pull` antes do step de migration
+
+### Motivação
+
+Incidente em produção: CD workflow rodou `docker run ghcr.io/.../api:staging npx prisma migrate deploy` em self-hosted runner que tinha a imagem anterior em cache. O step de migration reportou "no pending migrations" (imagem antiga, N migrations) enquanto o container deployado (imagem nova, N+1 migrations) referenciava uma coluna que ainda não existia. Fix: sempre `docker pull` antes de `docker run` nos steps de migration.
+
+---
+
 ## [2.2.0] - 2026-03-18
 
 ### Adicionado
