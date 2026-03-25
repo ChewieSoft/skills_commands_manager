@@ -2,7 +2,7 @@
   "name": "deploy",
   "description": "Automated deployment commands — staging and production pipelines via CD",
   "author": { "name": "Chewiesoft" },
-  "version": "1.3.0",
+  "version": "1.4.0",
   "category": "development",
   "keywords": ["deploy", "staging", "production", "cd", "pipeline", "git-flow", "github-actions"],
   "commands": "./commands"

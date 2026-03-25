@@ -1,5 +1,20 @@
 # Changelog — release
 
+## [1.2.0] — 2026-03-25
+
+### Added
+
+- **Multi-stack project detection** — auto-detects project name from `.sln`, `.csproj`, `package.json`, `Cargo.toml`, `go.mod` (priority order)
+- **`--path` filter** — filter commits/diffs to a subdirectory for monorepo component releases (e.g., `1.0.0 --path LicenceManager/`)
+- **Multi-stack dependency detection** — detects dependency changes from `*.csproj`/`Directory.Build.props` (C#), `package.json` (Node), `go.mod` (Go), `Cargo.toml` (Rust), `pyproject.toml`/`requirements.txt` (Python)
+- Quality rule #8: path filter scoping for commits and file changes
+
+### Changed
+
+- Release target branch now uses current branch (`git branch --show-current`) instead of hardcoded `main`
+- Dependencies template section is now language-agnostic (removed hardcoded "Node.js, TypeScript")
+- Description updated to mention multi-stack support
+
 ## [1.1.0] — 2026-03-25
 
 ### Fixed
