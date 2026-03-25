@@ -2,6 +2,25 @@
 
 Formato: [Semantic Versioning](https://semver.org/)
 
+## [1.2.0] - 2026-03-25
+
+### Added
+
+- `dotnet` as `frameworkPatterns` option for C#/.NET projects (WPF, WinForms, ASP.NET, Console)
+- .NET-specific checks: `async void`, `IDisposable`, `MessageBox` in service classes, `public static` mutable, `new HttpClient()`, `Thread.Sleep()`, SQL injection, MVVM violations
+- .NET file exclusions: `bin/`, `obj/`, `*.Designer.cs`, `*.g.cs`
+- .NET test file mapping: `{ProjectName}.Tests/{Base}Tests.cs` patterns
+- .NET test root auto-detection via `.csproj` references to xUnit/NUnit/MSTest
+- .NET override examples in configuration.md
+- .NET report example in report-template.md
+- `dotnet test` command detection in coderabbit_pr skill
+
+### Changed
+
+- Zen Principles (§5) and Detection Passes (§6) refactored into universal + framework-conditional blocks
+- All React/TypeScript-specific checks now conditional on `frameworkPatterns=react|vue|angular|node`
+- Backward compatible: default behavior unchanged when no `frameworkPatterns` override is specified
+
 ## [1.1.0] - 2026-03-23
 
 ### Adicionado

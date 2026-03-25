@@ -1,11 +1,11 @@
 {
   "name": "codereview",
-  "description": "Code review toolkit: automated pre-PR review with severity grading, and CodeRabbit PR comment resolver. Stack-agnostic with TypeScript/React defaults.",
+  "description": "Code review toolkit: automated pre-PR review with severity grading, and CodeRabbit PR comment resolver. Stack-agnostic with TypeScript/React defaults and dotnet preset for C#/.NET projects.",
   "author": {
     "name": "Chewiesoft"
   },
-  "version": "1.1.0",
+  "version": "1.2.0",
   "category": "quality",
-  "keywords": ["code-review", "pre-pr", "quality", "testing", "security", "review", "coderabbit", "pr-comments"],
+  "keywords": ["code-review", "pre-pr", "quality", "testing", "security", "review", "coderabbit", "pr-comments", "dotnet", "csharp", "wpf"],
   "skills": "./skills"
 }

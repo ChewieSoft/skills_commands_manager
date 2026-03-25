@@ -1,7 +1,7 @@
 ---
 name: codereview
 metadata:
-  version: 1.0.0
+  version: 1.2.0
 description: >
   Automated pre-PR code review. Diffs current branch against main, analyzes all
   changed files, and produces a structured report with severity-rated findings,
@@ -31,7 +31,7 @@ Read `references/configuration.md` for default values and override syntax.
 
 Perform a comprehensive, automated code review of all changes in the current branch compared to the base branch. Produce a structured Markdown report with severity-rated findings, test coverage assessment, and a final grade. This replaces manual pre-PR review.
 
-This skill is **stack-agnostic** — defaults target TypeScript/React but all values are configurable.
+This skill is **stack-agnostic**. Defaults target TypeScript/React but all values are configurable. Set `frameworkPatterns=dotnet` for C#/.NET projects (WPF, WinForms, ASP.NET, Console) — this activates .NET-specific checks and deactivates web-frontend rules. The universal checks (readability, complexity, error handling, secrets) apply to every stack.
 
 ---
 
@@ -124,6 +124,10 @@ If `CHANGED_FILES` is empty, output a short message: "No changes detected betwee
 - `**/.claude/**` (command and skill files themselves)
 - `**/.claude/skills/**`
 
+**Additional exclusions by `frameworkPatterns`:**
+
+- `dotnet`: `**/bin/**`, `**/obj/**`, `**/*.Designer.cs`, `**/*.g.cs`, `**/*.g.i.cs`, `**/AssemblyInfo.cs`, `**/*.user`, `**/*.suo`
+
 **Classify** remaining files into categories using the Configuration values:
 
 | Category | Pattern (uses config values) | Review Rigor |
@@ -167,6 +171,17 @@ Map each `CODE` file to its corresponding test file(s) using the following prior
 2. If `jest.config.*` or `package.json` contains `jest.roots` or `jest.testMatch`, derive the test root
 3. Fall back to the first of `src/test/`, `tests/`, `test/`, or `__tests__/` that exists at repo root
 
+**When `frameworkPatterns=dotnet`**, use these candidate patterns instead:
+
+| Priority | Candidate pattern (given source `{dir}/{Base}.{ext}`) |
+|----------|-------------------------------------------------------|
+| 1 (highest) | `{ProjectName}.Tests/{Base}Tests.cs` — sibling test project |
+| 2 | `{ProjectName}.Tests/**/{Base}Tests.cs` — test project subdirectory |
+| 3 | `{dir}/{Base}Tests.cs` — same directory |
+| 4 (lowest) | Any file in `CHANGED_FILES` (TESTS category) matching `{Base}` (case-insensitive) |
+
+**Auto-detect `{testRoot}` for dotnet**: Look for `*.csproj` files containing `<PackageReference Include="xunit"` or `Microsoft.NET.Test.Sdk` or `NUnit` or `MSTest`. The directory of such `.csproj` is the test root.
+
 **Resolution rules:**
 
 - A **match** at a priority level means one or more candidate paths resolve to real files in the repository.
@@ -185,13 +200,24 @@ Apply these 5 principles as analysis lenses to all `CODE` files (reduced rigor f
 
 #### 5.1 "Beautiful is better than ugly" & "Readability counts"
 
+**Universal:**
+
 - Non-semantic variable/function names (single letters, abbreviations, misleading names)
 - Inconsistent formatting within the changed code
 - Magic numbers or strings without named constants
 - Excessively long functions (>50 lines of logic)
-- Missing or misleading JSDoc on exported functions
+- Missing or misleading documentation on exported/public functions
+  - `react|vue|angular|node`: JSDoc (`/** ... */`)
+  - `dotnet`: XML documentation comments (`/// <summary>`)
 
 #### 5.2 "Explicit is better than implicit"
+
+**Universal:**
+
+- Missing parameter validation at public API boundaries
+- Implicit type conversions that could lose data
+
+**When `frameworkPatterns` is `react|vue|angular|node` (web frontend):**
 
 - Missing TypeScript types or using `any`
 - Implicit return types on exported functions
@@ -199,69 +225,156 @@ Apply these 5 principles as analysis lenses to all `CODE` files (reduced rigor f
 - `useEffect` with missing or incorrect dependency arrays
 - Implicit boolean coercion that could mask bugs (e.g., `value && <Component />` where value could be `0`)
 
+**When `frameworkPatterns=dotnet`:**
+
+- `var` used where type is genuinely ambiguous (non-obvious inference)
+- `dynamic` keyword without strong justification
+- Implicit conversions that could lose data (e.g., `long` to `int`)
+
 #### 5.3 "Simple is better than complex"
+
+**Universal:**
 
 - Over-engineered abstractions for simple problems
 - Unnecessary indirection (wrapper functions that just forward calls)
-- Single Responsibility Principle violations (component doing too much)
-- Custom hooks that could be replaced with simpler patterns
+- Single Responsibility Principle violations (class/component doing too much)
 - Premature optimization without evidence of need (flag as LOW with note: "Consider profiling to confirm benefit before applying")
+
+**When `frameworkPatterns` is `react|vue|angular|node`:**
+
+- Custom hooks that could be replaced with simpler patterns
+
+**When `frameworkPatterns=dotnet`:**
+
+- Business logic in XAML code-behind instead of ViewModel (MVVM violation)
+- Over-abstracted service interfaces with single implementation and no test seam justification
 
 #### 5.4 "Flat is better than nested"
 
+**Universal:**
+
 - Arrow code (>3 levels of nesting)
 - Missing guard clauses (early returns)
+
+**When `frameworkPatterns` is `react|vue|angular|node`:**
+
 - Deeply nested ternary operators in JSX
 - Callback pyramids (nested `.then()` chains or nested callbacks)
 - Complex conditional rendering that could be extracted
 
+**When `frameworkPatterns=dotnet`:**
+
+- Deeply nested `if/else` chains that could use pattern matching or guard clauses
+- Complex LINQ chains (>3 chained operations) that would be clearer as separate steps
+
 #### 5.5 "Errors should never pass silently"
 
-- Empty `catch` blocks or catch with only `console.log`
+**Universal:**
+
+- Empty `catch` blocks or catch that only logs without re-throwing or returning error
+- API/service calls without error feedback path
+- Silent fallbacks that hide bugs
+
+**When `frameworkPatterns` is `react|vue|angular|node`:**
+
 - Unhandled Promise rejections
 - Missing error boundaries for component trees
-- API calls without error feedback to the user
-- Silent fallbacks that hide bugs (e.g., `value ?? defaultValue` without logging)
+
+**When `frameworkPatterns=dotnet`:**
+
+- `async void` methods outside of UI event handlers (unobservable exceptions) — flag as CRITICAL
+- `catch (Exception) { }` without logging or re-throw — flag as HIGH
+- Missing `try/finally` or `using` for `IDisposable` resources — flag as HIGH
 
 ### 6. Additional Detection Passes
 
 #### 6.1 Bug Detection
 
-- Potential null/undefined access without checks
-- `useEffect` dependency array mismatches (missing deps or unnecessary deps)
-- Race conditions in async operations (stale closure, unmounted component updates)
-- Direct state mutation (modifying state objects/arrays without creating new references)
+**Universal:**
+
+- Potential null access without checks
 - Off-by-one errors in loops or array operations
-- Incorrect equality checks (`==` instead of `===`)
 - `async` functions that never `await` anything (likely missing await or unnecessary async)
+
+**When `frameworkPatterns` is `react|vue|angular|node`:**
+
+- `useEffect` dependency array mismatches (missing deps or unnecessary deps)
+- Race conditions from stale closures or unmounted component updates
+- Direct state mutation (modifying state objects/arrays without creating new references)
+- Incorrect equality checks (`==` instead of `===`)
+
+**When `frameworkPatterns=dotnet`:**
+
+- `async void` (except UI event handlers) — unhandled exceptions crash the app
+- `IDisposable` not disposed (missing `using` statement)
+- Race conditions with `Task.Run` and shared mutable state
+- `DateTime.Now` instead of `DateTime.UtcNow` in cross-timezone logic
+- Deadlocks from `.Result` or `.Wait()` on async code in UI thread
 
 #### 6.2 Security
 
-- XSS vectors: `dangerouslySetInnerHTML`, unescaped user input in DOM
+**Universal:**
+
 - Exposed secrets, API keys, tokens in code or config
-- Hardcoded API URLs or service endpoints (should use environment variables or config)
+- Hardcoded API URLs, service endpoints, or connection strings (should use environment variables or config)
 - `eval()`, `new Function()`, or dynamic code execution
-- Insecure data handling (sensitive data in localStorage without encryption)
 - Missing input validation/sanitization at system boundaries
+
+**When `frameworkPatterns` is `react|vue|angular|node`:**
+
+- XSS vectors: `dangerouslySetInnerHTML`, unescaped user input in DOM
+- Sensitive data in localStorage without encryption
+
+**When `frameworkPatterns=dotnet`:**
+
+- SQL string concatenation (use parameterized queries or Entity Framework)
+- `MessageBox.Show()` or `OpenFileDialog` in service/domain classes (UI leak into business layer)
+- `System.Windows.Forms` using in non-UI classes
+- Hardcoded file paths without `Path.Combine()`
 
 #### 6.3 Performance
 
+**Universal:**
+
+- Large classes/components that should be split for maintainability or lazy loading
+- Expensive computations without caching or memoization
+
+**When `frameworkPatterns` is `react|vue|angular|node`:**
+
 - Inline object/array/function creation in JSX props (new reference every render)
-- Large components that should be split for code-splitting / lazy loading
 - Missing `key` props or using array index as `key` in dynamic lists
 - **`React.memo` missing** — flag as **MEDIUM** only when the component is rendered inside a list or loop, or when prop identity changes are known to cause unnecessary child re-renders. Otherwise flag as **LOW** or omit.
 - **`useCallback` missing** — flag as **MEDIUM** only when the callback is passed as a prop to a memoized child or used in a `useEffect` dependency array and its identity changes provably cause repeated effect execution. Otherwise flag as **LOW** or omit.
 - **`useMemo` missing** — flag as **MEDIUM** only when the computation is demonstrably expensive (>100ms measured, or explicitly identified by profiling). For cheap computations flag as **LOW** or omit.
 - **All other memoization suggestions** — assign **LOW** and include a note: _"Recommend running a profiler before applying this optimization to confirm a measurable benefit."_
-- Expensive computations inside render without memoization (apply the `useMemo` criteria above before flagging)
+
+**When `frameworkPatterns=dotnet`:**
+
+- `new HttpClient()` per-call instead of `IHttpClientFactory` or injected instance
+- String concatenation in loops (use `StringBuilder`)
+- `Thread.Sleep()` in async code or tests
+- LINQ `.ToList()` or `.ToArray()` when `IEnumerable` suffices (unnecessary materialization)
 
 #### 6.4 Type Safety
 
+**Universal:**
+
+- Missing discriminated union / exhaustive switch checks (switch without default)
+- Excessive type casting that bypasses type checking
+
+**When `frameworkPatterns` is `react|vue|angular|node`:**
+
 - Usage of `any` type (explicit or implicit)
-- Excessive type assertions (`as Type`) that bypass type checking
+- Type assertions (`as Type`) that bypass type checking
 - Missing return types on exported functions
 - Optional chaining chains longer than 3 levels (`a?.b?.c?.d?.e`)
-- Missing discriminated union checks (switch without default/exhaustive check)
+
+**When `frameworkPatterns=dotnet`:**
+
+- `public static` mutable fields used as service locator pattern
+- Missing null checks on deserialized objects (JSON/XML)
+- Casting with `(Type)obj` instead of pattern matching (`is Type t`)
+- `object` or `dynamic` used where a generic `<T>` or interface fits
 
 ### 7. Assign Severities
 

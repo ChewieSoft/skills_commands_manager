@@ -11,7 +11,7 @@
 | `testFilePatterns` | `["**/*.{test,spec}.{ts,tsx}", "**/test/**"]` | Globs that identify test files (resolved relative to `baseDir`). |
 | `generatedDirs` | `["src/components/ui/**", "prisma/**", "**/generated/**"]` | Globs for auto-generated or UI-lib directories — classified as `UI_LIB` (reduced-rigor). |
 | `uiLibReducedRigor` | `true` | When `true`, `UI_LIB` files receive only CRITICO/ALTO checks. Set to `false` to apply full analysis. |
-| `frameworkPatterns` | `react` | Framework hint controlling which framework-specific rules are active. Options: `react` \| `vue` \| `angular` \| `node` \| `generic`. |
+| `frameworkPatterns` | `react` | Framework hint controlling which framework-specific rules are active. Options: `react` \| `vue` \| `angular` \| `node` \| `dotnet` \| `generic`. |
 | `configFilePatterns` | `["*.config.*", "tsconfig*", ".env*", "package.json"]` | Globs matched as CONFIG files. |
 | `styleFilePatterns` | `["**/*.css", "**/*.scss", "**/*.less"]` | Globs matched as STYLES files. |
 
@@ -37,6 +37,15 @@ When `$ARGUMENTS` contains key-value overrides, apply them before classification
 
 # Disable reduced rigor for generated files
 /codereview uiLibReducedRigor=false
+
+# C#/.NET WPF project
+/codereview fileExtensions=cs,xaml testFilePatterns=**/*Tests.cs,**/*.Tests/**/*.cs frameworkPatterns=dotnet generatedDirs=**/obj/**,**/bin/**,**/*.Designer.cs configFilePatterns=*.csproj,*.sln,*.props,appsettings*.json
+
+# C#/.NET Web API (ASP.NET Core)
+/codereview fileExtensions=cs testFilePatterns=**/*Tests.cs frameworkPatterns=dotnet
+
+# C#/.NET minimal — just set framework, use sensible auto-detection
+/codereview fileExtensions=cs frameworkPatterns=dotnet
 ```
 
 Overrides are applied on top of defaults — only the specified values change; unmentioned values keep their defaults.

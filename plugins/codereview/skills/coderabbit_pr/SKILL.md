@@ -171,11 +171,12 @@ Skip if `--skip-tests` was passed.
 |----------|-----------|---------|
 | 1 | `package.json` has `scripts.test` | `npm test` |
 | 2 | Monorepo with multiple `package.json` | `npm test` in each package with modified files |
-| 3 | `Cargo.toml` exists | `cargo test` |
-| 4 | `pyproject.toml` or `setup.py` | `pytest` |
-| 5 | `go.mod` exists | `go test ./...` |
-| 6 | `Makefile` has `test` target | `make test` |
-| 7 | None detected | Ask the user |
+| 3 | `*.sln` or `*.csproj` exists | `dotnet test` |
+| 4 | `Cargo.toml` exists | `cargo test` |
+| 5 | `pyproject.toml` or `setup.py` | `pytest` |
+| 6 | `go.mod` exists | `go test ./...` |
+| 7 | `Makefile` has `test` target | `make test` |
+| 8 | None detected | Ask the user |
 
 #### 4.2 Run and Report
 

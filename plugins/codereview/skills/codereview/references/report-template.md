@@ -142,6 +142,29 @@ Files changed: 4 | Insertions: 87 | Deletions: 23
 ### Grade: B
 ```
 
+### .NET project — minimal run
+
+```bash
+/codereview fileExtensions=cs frameworkPatterns=dotnet
+```
+
+**Expected output (excerpt)**:
+
+```text
+# Code Review: 001-licencemanager-decoupling
+
+**Branch**: `001-licencemanager-decoupling` → `master`
+Files changed: 6 | Insertions: 320 | Deletions: 45
+
+### Findings Summary
+| # | Severity | File | Line | Description |
+|---|----------|------|------|-------------|
+| 1 | HIGH     | LicenseService.cs | 67 | IDisposable RSACryptoServiceProvider not wrapped in `using` |
+| 2 | MEDIUM   | MainWindowViewModel.cs | 112 | File dialog in ViewModel — consider abstracting behind interface |
+
+### Grade: B
+```
+
 ### Focused run — security only
 
 ```bash
