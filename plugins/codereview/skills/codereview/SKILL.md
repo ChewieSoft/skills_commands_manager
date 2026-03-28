@@ -392,6 +392,8 @@ For every **new or modified** function, method, class, or exported constant in t
 - **TypeScript/JavaScript**: JSDoc comment (`/** ... */`) on exported functions, classes, interfaces, and type aliases. At minimum: a one-line description. Parameters and return types documented when not obvious from the signature. If the project's CLAUDE.md or rules specify a documentation language (e.g., "docstrings in Brazilian Portuguese"), flag docstrings written in the wrong language as **MEDIUM**.
 - **C# / .NET**: XML documentation comments (`/// <summary>`) on public members.
 - **Python**: Docstrings on public functions, classes, and modules.
+- **Go**: Package-level comments and exported function comments per `godoc` convention.
+- **Shell** (`.sh`, `.bash`): Header comment block describing script purpose and usage; inline comments on non-obvious logic. No formal docstring standard — flag only when a script has zero header comment.
 - **Other languages**: Language-appropriate documentation conventions.
 
 **Severity rules for missing docstrings:**
@@ -453,6 +455,12 @@ Output the Markdown report directly in the conversation following that template.
 
 - **Zero findings**: Output a congratulatory report. Grade A across all criteria. Still show the header, test coverage table, and grade table.
 - **$ARGUMENTS matches a focus area**: Only run the matching detection passes from steps 5-6. Still show full report structure but mark non-analyzed sections as "Not analyzed (focused review on {area})".
+  - `security` → run only 6.2 Security
+  - `performance` → run only 6.3 Performance
+  - `types` → run only 6.4 Type Safety
+  - `bugs` → run only 6.1 Bug Detection
+  - `tests` → run only Step 4 (Test Coverage assessment) and test quality analysis on TESTS files
+  - `docs` → run only 6.5 Documentation Sync & Docstring Coverage (skip 5.x, 6.1-6.4)
 - **$ARGUMENTS matches a file path/glob**: Only analyze matching files from the changed files list. Show only those files in the report.
 - **UI_LIB files**: Apply only CRITICAL and HIGH severity checks. Note in findings: "(UI_LIB - reduced rigor)".
 - **More than 50 findings**: Show all CRITICAL/HIGH/MEDIUM findings first, then as many LOW as fit within the 50-finding cap. Add overflow count. Recommend running focused reviews per file.
