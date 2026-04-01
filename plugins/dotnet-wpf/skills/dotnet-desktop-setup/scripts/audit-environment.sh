@@ -59,16 +59,18 @@ if [ -n "$SLN_FILE" ]; then
     echo ""
     echo "Projetos e Frameworks:"
     # Encontrar todos os .csproj referenciados
-    grep -oP 'Project\("[^"]*"\) = "[^"]*", "([^"]*\.csproj)"' "$SLN_FILE" 2>/dev/null | \
-        grep -oP '"[^"]*\.csproj"' | tr -d '"' | while read -r csproj; do
-        if [ -f "$csproj" ]; then
-            fw=$(grep -oP '<TargetFramework[s]?>\K[^<]+' "$csproj" 2>/dev/null | head -1)
-            output_type=$(grep -oP '<OutputType>\K[^<]+' "$csproj" 2>/dev/null | head -1)
-            printf "  %-45s %-25s %s\n" "$csproj" "${fw:-N/A}" "${output_type:-Library}"
-        fi
-    done
-    # Fallback: buscar todos os csproj se o parse do sln falhar
-    if [ $? -ne 0 ]; then
+    CSPROJ_LIST=$(grep -oP 'Project\("[^"]*"\) = "[^"]*", "([^"]*\.csproj)"' "$SLN_FILE" 2>/dev/null | \
+        grep -oP '"[^"]*\.csproj"' | tr -d '"')
+    if [ -n "$CSPROJ_LIST" ]; then
+        echo "$CSPROJ_LIST" | while read -r csproj; do
+            if [ -f "$csproj" ]; then
+                fw=$(grep -oP '<TargetFramework[s]?>\K[^<]+' "$csproj" 2>/dev/null | head -1)
+                output_type=$(grep -oP '<OutputType>\K[^<]+' "$csproj" 2>/dev/null | head -1)
+                printf "  %-45s %-25s %s\n" "$csproj" "${fw:-N/A}" "${output_type:-Library}"
+            fi
+        done
+    else
+        # Fallback: buscar todos os csproj se o parse do sln falhar
         find . -name "*.csproj" -not -path "*/bin/*" -not -path "*/obj/*" | while read -r csproj; do
             fw=$(grep -oP '<TargetFramework[s]?>\K[^<]+' "$csproj" 2>/dev/null | head -1)
             printf "  %-45s %s\n" "$csproj" "${fw:-N/A}"
